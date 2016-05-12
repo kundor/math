@@ -282,10 +282,9 @@ public:
        normalize();
    }
 
-   template <class U>
-   explicit polynomial(const U& point)
+   explicit polynomial(const T& point)
    {
-       if (point != U(0))
+       if (point != T(0))
           m_data.push_back(point);
    }
 
@@ -353,63 +352,56 @@ public:
    }
 
    // operators:
-   template <class U>
-   polynomial& operator +=(const U& value)
+   polynomial& operator +=(const T& value)
    {
        addition(value);
        normalize();
        return *this;
    }
 
-   template <class U>
-   polynomial& operator -=(const U& value)
+   polynomial& operator -=(const T& value)
    {
        subtraction(value);
        normalize();
        return *this;
    }
 
-   template <class U>
-   polynomial& operator *=(const U& value)
+   polynomial& operator *=(const T& value)
    {
       multiplication(value);
       normalize();
       return *this;
    }
 
-   template <class U>
-   polynomial& operator /=(const U& value)
+   polynomial& operator /=(const T& value)
    {
        division(value);
        normalize();
        return *this;
    }
 
-   template <class U>
-   polynomial& operator %=(const U& /*value*/)
+   polynomial& operator %=(const T& /*value*/)
    {
        // We can always divide by a scalar, so there is no remainder:
        *this = zero_element(std::multiplies<polynomial>());
        return *this;
    }
 
-   template <class U>
-   polynomial& operator +=(const polynomial<U>& value)
+   polynomial& operator +=(const polynomial& value)
    {
       addition(value);
       normalize();
       return *this;
    }
 
-   template <class U>
-   polynomial& operator -=(const polynomial<U>& value)
+   polynomial& operator -=(const polynomial& value)
    {
        subtraction(value);
        normalize();
        return *this;
    }
-   template <class U>
-   polynomial& operator *=(const polynomial<U>& value)
+
+   polynomial& operator *=(const polynomial& value)
    {
       // TODO: FIXME: use O(N log(N)) algorithm!!!
       polynomial const zero = zero_element(std::multiplies<polynomial>());
@@ -426,15 +418,13 @@ public:
       return *this;
    }
 
-   template <typename U>
-   polynomial& operator /=(const polynomial<U>& value)
+   polynomial& operator /=(const polynomial& value)
    {
        *this = quotient_remainder(*this, value).first;
        return *this;
    }
 
-   template <typename U>
-   polynomial& operator %=(const polynomial<U>& value)
+   polynomial& operator %=(const polynomial& value)
    {
        *this = quotient_remainder(*this, value).second;
        return *this;
@@ -465,8 +455,8 @@ public:
    }
 
 private:
-    template <class U, class R1, class R2>
-    polynomial& addition(const U& value, R1 sign, R2 op)
+    template <class R1, class R2>
+    polynomial& addition(const T& value, R1 sign, R2 op)
     {
         if(m_data.size() == 0)
             m_data.push_back(sign(value));
@@ -475,20 +465,18 @@ private:
         return *this;
     }
 
-    template <class U>
-    polynomial& addition(const U& value)
+    polynomial& addition(const T& value)
     {
-        return addition(value, detail::identity<U>(), std::plus<U>());
+        return addition(value, detail::identity<T>(), std::plus<T>());
     }
 
-    template <class U>
-    polynomial& subtraction(const U& value)
+    polynomial& subtraction(const T& value)
     {
-        return addition(value, std::negate<U>(), std::minus<U>());
+        return addition(value, std::negate<T>(), std::minus<T>());
     }
 
-    template <class U, class R1, class R2>
-    polynomial& addition(const polynomial<U>& value, R1 sign, R2 op)
+    template <class R1, class R2>
+    polynomial& addition(const polynomial& value, R1 sign, R2 op)
     {
         size_type s1 = (std::min)(m_data.size(), value.size());
         for(size_type i = 0; i < s1; ++i)
@@ -498,28 +486,24 @@ private:
         return *this;
     }
 
-    template <class U>
-    polynomial& addition(const polynomial<U>& value)
+    polynomial& addition(const polynomial& value)
     {
-        return addition(value, detail::identity<U>(), std::plus<U>());
+        return addition(value, detail::identity<T>(), std::plus<T>());
     }
 
-    template <class U>
-    polynomial& subtraction(const polynomial<U>& value)
+    polynomial& subtraction(const polynomial& value)
     {
-        return addition(value, std::negate<U>(), std::minus<U>());
+        return addition(value, std::negate<T>(), std::minus<T>());
     }
 
-    template <class U>
-    polynomial& multiplication(const U& value)
+    polynomial& multiplication(const T& value)
     {
         using namespace boost::lambda;
         std::transform(m_data.begin(), m_data.end(), m_data.begin(), ret<T>(_1 * value));
         return *this;
     }
 
-    template <class U>
-    polynomial& division(const U& value)
+    polynomial& division(const T& value)
     {
         using namespace boost::lambda;
         std::transform(m_data.begin(), m_data.end(), m_data.begin(), ret<T>(_1 / value));
@@ -554,48 +538,48 @@ inline polynomial<T> operator * (const polynomial<T>& a, const polynomial<T>& b)
    return result;
 }
 
-template <class T, class U>
-inline polynomial<T> operator + (const polynomial<T>& a, const U& b)
+template <class T>
+inline polynomial<T> operator + (const polynomial<T>& a, const T& b)
 {
    polynomial<T> result(a);
    result += b;
    return result;
 }
 
-template <class T, class U>
-inline polynomial<T> operator - (const polynomial<T>& a, const U& b)
+template <class T>
+inline polynomial<T> operator - (const polynomial<T>& a, const T& b)
 {
    polynomial<T> result(a);
    result -= b;
    return result;
 }
 
-template <class T, class U>
-inline polynomial<T> operator * (const polynomial<T>& a, const U& b)
+template <class T>
+inline polynomial<T> operator * (const polynomial<T>& a, const T& b)
 {
    polynomial<T> result(a);
    result *= b;
    return result;
 }
 
-template <class U, class T>
-inline polynomial<T> operator + (const U& a, const polynomial<T>& b)
+template <class T>
+inline polynomial<T> operator + (const T& a, const polynomial<T>& b)
 {
    polynomial<T> result(b);
    result += a;
    return result;
 }
 
-template <class U, class T>
-inline polynomial<T> operator - (const U& a, const polynomial<T>& b)
+template <class T>
+inline polynomial<T> operator - (const T& a, const polynomial<T>& b)
 {
    polynomial<T> result(a);
    result -= b;
    return result;
 }
 
-template <class U, class T>
-inline polynomial<T> operator * (const U& a, const polynomial<T>& b)
+template <class T>
+inline polynomial<T> operator * (const T& a, const polynomial<T>& b)
 {
    polynomial<T> result(b);
    result *= a;
