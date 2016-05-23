@@ -387,21 +387,24 @@ public:
    }
 
    template <class U>
-   polynomial& operator %=(const U& value)
+   BOOST_DEDUCED_TYPENAME enable_if_c<std::numeric_limits<T>::is_integer, polynomial >::type&
+   operator %=(const U& value)
    {
        // In the case that T is integral, this preserves the semantics
        // p == r*(p/r) + (p % r), for polynomial<T> p and U r.
-       if (std::numeric_limits<T>::is_integer)
-       {
-           modulus(value);
-           normalize();
-       }
-       else
-       {
-           m_data.clear();
-       }
+       modulus(value);
+       normalize();
        return *this;
    }
+
+   template <class U>
+   BOOST_DEDUCED_TYPENAME disable_if_c<std::numeric_limits<T>::is_integer, polynomial >::type&
+   operator %=(const U& /*value*/)
+   {
+       m_data.clear();
+       return *this;
+   }
+
 
    polynomial& operator +=(const polynomial& value)
    {
